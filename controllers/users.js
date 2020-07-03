@@ -10,7 +10,26 @@ const getAll = async (req, res, next) => {
   }
 }
 
-const create = async (req, res, next) => {
+const validateUser = (req, res, next) => {
+  let {username, name, password} = req.body
+  username = username.trim()
+  name = name.trim()
+  password = password.trim()
+
+  if (!username) {
+    return res.status(400).send({error: 'Username is required'})
+  }
+  if (!password) {
+    return res.status(400).send({error: 'Password is required'})
+  }
+  if (password.length < 3) {
+    return res.status(400).send({error: 'Password minlength is 3'})
+  }
+  req.body = {...req.body, username, name, password}
+  return next()
+}
+
+const create = [validateUser, async (req, res, next) => {
   try {
     const {username, name, password} = req.body
     const saltRounds = 10
@@ -23,7 +42,7 @@ const create = async (req, res, next) => {
   } catch (e) {
     next(e)
   }
-}
+}]
 
 module.exports = {
   getAll,
