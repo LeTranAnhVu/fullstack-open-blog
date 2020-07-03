@@ -51,6 +51,11 @@ const initBlogs = [{
 }
 ]
 
+
+const blogsInDb = async () => {
+  return await Blog.find({})
+}
+
 describe('api test', () => {
   beforeAll(async () => {
     await mongoConnection.initialize()
@@ -66,7 +71,7 @@ describe('api test', () => {
       .get('/api/blogs')
       .expect(200)
       .expect('Content-Type', /application\/json/)
-    expect(res.body).toHaveLength(6)
+    expect(res.body).toHaveLength(5)
   })
 
   test('blog-list-test: should return id instead of _id', async () => {
@@ -112,6 +117,81 @@ describe('api test', () => {
       .send(blogInput)
       .expect(400)
   })
+
+  test('blog-list-test: delete a blog by id', async () => {
+    const blog = await blogsInDb()
+    const deleteId = blog[0].id
+    // delete
+    await api
+      .delete(`/api/blogs/${deleteId}`)
+      .expect(204)
+
+    // check remain blogs
+    const res = await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+    expect(res.body).toHaveLength(4)
+  })
+
+  test('blog-list-test: cannot delete a blog by wrong id', async () => {
+    // delete
+    await api
+      .delete(`/api/blogs/invalidId`)
+      .expect(400)
+
+    // check remain blogs
+    const res = await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+    expect(res.body).toHaveLength(5)
+  })
+
+  test('blog-list-test: find a blog by id', async () => {
+    const blogs = await blogsInDb()
+    const res = await api
+      .get(`/api/blogs/${blogs[0].id}`)
+      .expect(200)
+
+    expect(res.body).toHaveProperty('id', blogs[0].id)
+  })
+
+  const badfindId = [
+    ['5a422a851b54a6762fffffff', 404],
+    ['sadhfgajhsdf', 404]
+  ]
+  test.each(badfindId)('blog-list-test: cannot find a blog by id', async (id, status) => {
+    const res = await api
+      .get(`/api/blogs/${id}`)
+      .expect(status)
+  })
+
+  test('blog-list-test: update a blog by id', async () => {
+    const blogs = await blogsInDb()
+    const data = {...blogs[0].toJSON(), title: 'changed'}
+    const res = await api
+      .put(`/api/blogs/${blogs[0].id}`)
+      .send(data)
+      .expect(200)
+
+    expect(res.body).toHaveProperty('id', blogs[0].id)
+    expect(res.body).toHaveProperty('title', 'changed')
+    expect(res.body).toHaveProperty('author', blogs[0].author)
+    expect(res.body).toHaveProperty('url', blogs[0].url)
+
+  })
+
+
+  test.each(badfindId)('blog-list-test: cannot update a blog by id', async (id, status) => {
+    const blogs = await blogsInDb()
+    const data = {...blogs[0].toJSON(), title: 'changed'}
+    const res = await api
+      .put(`/api/blogs/${id}`)
+      .send(data)
+      .expect(status)
+  })
+
 
   afterAll(async (done) => {
     await mongoose.connection.close()

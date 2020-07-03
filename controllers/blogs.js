@@ -22,7 +22,45 @@ const create = async (req, res, next) => {
   }
 }
 
+const deleteById = async (req, res, next) => {
+  try {
+    const {id} = req.params
+    const blog = await Blog.findByIdAndDelete(id)
+    return res.status(204).end()
+  } catch (e) {
+    next(e)
+  }
+}
+const getById = async (req, res, next) => {
+  try {
+    const {id} = req.params
+    const blog = await Blog.findById(id)
+    if (!blog) {
+      throw new Error('Not found')
+    }
+    return res.json(blog)
+  } catch (e) {
+    next(e)
+  }
+}
+const updateById = async (req, res, next) => {
+  try {
+    const {id} = req.params
+    const {title, author, url, likes} = req.body
+    const updateData = {title, author, url, likes}
+    const blog = await Blog.findByIdAndUpdate(id, updateData, {new: true, runValidators: true})
+    if (!blog) {
+      throw new Error('Not found')
+    }
+    return res.json(blog)
+  } catch (e) {
+    next(e)
+  }
+}
 module.exports = {
   getAll,
-  create
+  create,
+  deleteById,
+  updateById,
+  getById
 }

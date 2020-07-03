@@ -1,10 +1,10 @@
 const logger = require('./logger')
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({error: 'unknown endpoint'})
+const unknownEndpoint = (err ,req, res, next) => {
+  res.status(404).send({error: 'unknown endpoint'})
 }
 const errorHandler = (err, req, res, next) => {
-  logger.error(err)
+  logger.error('error')
   if (err.name === 'CastError' && err.kind == 'ObjectId') {
     return res.status(400).send({error: 'malformatted id'})
   } else if (err.name === 'ValidationError') {
