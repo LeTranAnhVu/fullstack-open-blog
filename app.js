@@ -4,6 +4,7 @@ const morgan = require('morgan')
 const app = express()
 const mongoConnection = require('./mongoConnect')
 const blogRouter = require('./routes/blog')
+const userRouter = require('./routes/user')
 const {NODE_ENV} = require('./utils/config')
 const {unknownEndpoint, errorHandler} = require('./utils/middlewares')
 // connect database
@@ -28,6 +29,7 @@ app.use(morganStyle)
 
 // routes
 app.use('/api', blogRouter)
+app.use('/api', userRouter)
 
 // error handler
 app.use(errorHandler)
