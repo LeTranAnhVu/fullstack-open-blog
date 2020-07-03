@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const dummy = (blogs) => {
   return 1
 }
@@ -15,9 +16,30 @@ const favoriteBlog = (blogs) => {
     return max
   }, null)
 }
+const mostBlogs = (blogs) => {
+  const obj = blogs.reduce((arr, blog) => {
+    console.log('aaarra', arr)
+    if (arr.length == 0) {
+      arr.push({author: blog.author, blogs: 1})
+    } else {
+      const authorIndex = _.findIndex(arr, o => o.author === blog.author)
+      if (authorIndex !== -1) {
+        arr[authorIndex] = {...arr[authorIndex], blogs: arr[authorIndex].blogs + 1}
+      } else {
+        arr.push({author: blog.author, blogs: 1})
+      }
+    }
+    return arr
 
+  }, [])
+
+
+  const author = _.maxBy(obj, 'blogs')
+  return author
+}
 module.exports = {
   dummy,
   totalLikes,
-  favoriteBlog
+  favoriteBlog,
+  mostBlogs
 }
