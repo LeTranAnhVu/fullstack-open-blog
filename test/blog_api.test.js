@@ -61,12 +61,21 @@ describe('api test', () => {
     await Blog.insertMany(initBlogs)
   })
 
-  test('blogs are returned as json', async () => {
+  test('blog-list-test: should return correct amount of  blog and json type', async () => {
     const res = await api
       .get('/api/blogs')
       .expect(200)
       .expect('Content-Type', /application\/json/)
     expect(res.body).toHaveLength(6)
+  })
+
+  test('blog-list-test: should return id instead of _id', async () => {
+    const res = await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+    expect(res.body[0].id).toBeDefined()
+    expect(res.body[0]._id).toBeUndefined()
   })
 
   afterAll(async (done) => {
