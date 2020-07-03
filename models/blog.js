@@ -13,9 +13,14 @@ const blogSchema = new mongoose.Schema({
   likes: {
     type: Number,
     default: 0
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   }
 })
 
+// another way to implement toJson
 blogSchema.methods.toJSON = function () {
   var obj = this.toObject()
   obj.id = obj._id.toString()
