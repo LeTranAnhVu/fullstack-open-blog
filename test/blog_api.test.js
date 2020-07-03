@@ -88,6 +88,17 @@ describe('api test', () => {
 
   })
 
+  test('blog-list-test: create new blog with 0 likes default', async () => {
+    delete oneBlog.likes
+    const res = await api
+      .post('/api/blogs')
+      .send(oneBlog)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+    expect(res.body).toHaveProperty('likes', 0)
+
+  })
+
   afterAll(async (done) => {
     await mongoose.connection.close()
     done()
