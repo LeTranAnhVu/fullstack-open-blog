@@ -4,10 +4,12 @@ const morgan = require('morgan')
 const app = express()
 const mongoConnection = require('./mongoConnect')
 const blogRouter = require('./routes/blog')
-
+const {NODE_ENV} = require('./utils/config')
 const {unknownEndpoint, errorHandler} = require('./utils/middlewares')
 // connect database
-mongoConnection.initialize()
+if (NODE_ENV !== 'test') {
+  mongoConnection.initialize()
+}
 
 // application
 app.use(cors())
