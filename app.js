@@ -5,6 +5,8 @@ const app = express()
 const mongoConnection = require('./mongoConnect')
 const blogRouter = require('./routes/blog')
 const userRouter = require('./routes/user')
+const authRouter = require('./routes/auth')
+
 const {NODE_ENV} = require('./utils/config')
 const {unknownEndpoint, errorHandler} = require('./utils/middlewares')
 // connect database
@@ -28,6 +30,7 @@ app.use(morganStyle)
 // app.use(express.static('build'))
 
 // routes
+app.use('/api', authRouter)
 app.use('/api', blogRouter)
 app.use('/api', userRouter)
 

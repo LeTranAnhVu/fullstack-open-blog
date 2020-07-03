@@ -1,6 +1,6 @@
 const logger = require('./logger')
 
-const unknownEndpoint = (err ,req, res, next) => {
+const unknownEndpoint = (err, req, res, next) => {
   res.status(404).send({error: 'unknown endpoint'})
 }
 const errorHandler = (err, req, res, next) => {
@@ -12,7 +12,12 @@ const errorHandler = (err, req, res, next) => {
   } else if (err.name === 'MongoError' && err.code === 11000) {
     const keys = Object.keys(err.keyPattern)
     return res.status(400).send({error: `${keys.join(',')} is existed`})
+  } else if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({
+      error: 'invalid token'
+    })
   }
+
   next(err)
 }
 module.exports = {

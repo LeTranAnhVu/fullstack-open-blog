@@ -11,13 +11,14 @@ const getAll = async (req, res, next) => {
 }
 const create = async (req, res, next) => {
   try {
+    const user = req.user
+    if(!user) {
+      return res.status(401).send({error: 'Un-authorization'})
+    }
+
     const {title, author, url, likes} = req.body
     // allow to create
     const newBlog = new Blog({title, author, url, likes})
-
-    // user
-    const user = await User.findOne()
-    newBlog.user = user._id
 
     await newBlog.save()
     user.blogs = [...user.blogs, newBlog._id]
