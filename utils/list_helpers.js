@@ -16,30 +16,39 @@ const favoriteBlog = (blogs) => {
     return max
   }, null)
 }
+
 const mostBlogs = (blogs) => {
   const obj = blogs.reduce((arr, blog) => {
-    console.log('aaarra', arr)
-    if (arr.length == 0) {
+    const authorIndex = _.findIndex(arr, o => o.author === blog.author)
+    if (arr.length == 0 || authorIndex === -1) {
       arr.push({author: blog.author, blogs: 1})
     } else {
-      const authorIndex = _.findIndex(arr, o => o.author === blog.author)
-      if (authorIndex !== -1) {
-        arr[authorIndex] = {...arr[authorIndex], blogs: arr[authorIndex].blogs + 1}
-      } else {
-        arr.push({author: blog.author, blogs: 1})
-      }
+      arr[authorIndex] = {...arr[authorIndex], blogs: arr[authorIndex].blogs + 1}
     }
     return arr
-
   }, [])
-
-
   const author = _.maxBy(obj, 'blogs')
   return author
 }
+
+const mostLikes = (blogs) => {
+  const obj = blogs.reduce((arr, blog) => {
+    const authorIndex = _.findIndex(arr, o => o.author === blog.author)
+    if (arr.length == 0 || authorIndex === -1) {
+      arr.push({author: blog.author, likes: blog.likes})
+    } else {
+      arr[authorIndex] = {...arr[authorIndex], likes: arr[authorIndex].likes + blog.likes}
+    }
+    return arr
+  }, [])
+  const author = _.maxBy(obj, 'likes')
+  return author
+}
+
 module.exports = {
   dummy,
   totalLikes,
   favoriteBlog,
-  mostBlogs
+  mostBlogs,
+  mostLikes
 }
