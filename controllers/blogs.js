@@ -64,10 +64,28 @@ const updateById = async (req, res, next) => {
     next(e)
   }
 }
+
+const likeBlogById = async (req, res, next) => {
+  try {
+    const {id} = req.params
+    const blog = await Blog.findById(id)
+    if (!blog) {
+      throw new Error('Not found')
+    }
+    blog.likes = blog.likes + 1
+    blog.save()
+    return res.json(blog)
+  } catch (e) {
+    next(e)
+  }
+}
+
+
 module.exports = {
   getAll,
   create,
   deleteById,
   updateById,
-  getById
+  getById,
+  likeBlogById
 }

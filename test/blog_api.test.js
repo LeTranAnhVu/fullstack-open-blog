@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const app = require('../app')
 const api = supertest(app)
 const mongoConnection = require('../mongoConnect')
@@ -56,6 +57,26 @@ const blogsInDb = async () => {
   return await Blog.find({})
 }
 
+const createUser = async () => {
+  const userPayload = {
+    'username': 'brian',
+    'name': 'brian le',
+    'password': '1234'
+  }
+  await api.post('/api/users')
+    .send(userPayload)
+}
+
+const tokenOfLoginUser = async () => {
+  const loginPayload = {
+    'username': 'brian',
+    'password': '1234'
+  }
+  const res = await api.post('/api/login')
+    .send(loginPayload)
+  return res.body.token
+}
+
 describe('api test', () => {
   beforeAll(async () => {
     await mongoConnection.initialize()
@@ -64,6 +85,8 @@ describe('api test', () => {
   beforeEach(async () => {
     await Blog.deleteMany({})
     await Blog.insertMany(initBlogs)
+    await User.deleteMany({})
+    await createUser()
   })
 
   test('blog-list-test: should return correct amount of  blog and json type', async () => {
@@ -84,8 +107,11 @@ describe('api test', () => {
   })
 
   test('blog-list-test: should create new blog and return new blog', async () => {
+    const token = await tokenOfLoginUser()
+
     const res = await api
       .post('/api/blogs')
+      .set('authorization', `bearer ${token}`)
       .send(oneBlog)
       .expect(200)
       .expect('Content-Type', /application\/json/)
@@ -93,15 +119,27 @@ describe('api test', () => {
 
   })
 
-  test('blog-list-test: create new blog with 0 likes default', async () => {
+  test('blog-list-test: should create new blog with 0 likes default', async () => {
+    const token = await tokenOfLoginUser()
     delete oneBlog.likes
     const res = await api
       .post('/api/blogs')
+      .set('authorization', `bearer ${token}`)
       .send(oneBlog)
       .expect(200)
       .expect('Content-Type', /application\/json/)
     expect(res.body).toHaveProperty('likes', 0)
   })
+
+  test('blog-list-test: should not create new blog when user not not login', async () => {
+    const token = 'dfajshdfjhasdhfahdfa'
+    const res = await api
+      .post('/api/blogs')
+      .set('authorization', `bearer ${token}`)
+      .send(oneBlog)
+      .expect(401)
+  })
+
   const badBlogs = [
     {
       url: 'https://reactpatterns.com/',
@@ -110,10 +148,11 @@ describe('api test', () => {
       title: 'React patterns',
     }
   ]
-
   test.each(badBlogs)('blog-list-test: cannot create new blog with empty title or url', async (blogInput) => {
+    const token = await tokenOfLoginUser()
     const res = await api
       .post('/api/blogs')
+      .set('authorization', `bearer ${token}`)
       .send(blogInput)
       .expect(400)
   })
