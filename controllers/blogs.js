@@ -3,7 +3,7 @@ const User = require('../models/user')
 // apis
 const getAll = async (req, res, next) => {
   try {
-    const blog = await Blog.find().populate('user',{username: 1, name: 1}).exec()
+    const blog = await Blog.find().populate('user', {username: 1, name: 1}).exec()
     return res.json(blog)
   } catch (e) {
     next(e)
@@ -12,17 +12,16 @@ const getAll = async (req, res, next) => {
 const create = async (req, res, next) => {
   try {
     const user = req.user
-    if(!user) {
+    if (!user) {
       return res.status(401).send({error: 'Un-authorization'})
     }
 
     const {title, author, url, likes} = req.body
     // allow to create
     const newBlog = new Blog({title, author, url, likes})
-
+    newBlog.user = user._id
     await newBlog.save()
     user.blogs = [...user.blogs, newBlog._id]
-
     user.save()
     return res.json(newBlog)
   } catch (e) {

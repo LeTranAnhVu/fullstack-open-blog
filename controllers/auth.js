@@ -1,4 +1,5 @@
 const User = require('../models/user')
+const Blog = require('../models/blog')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const {SECRET} = require('../utils/config')
@@ -18,7 +19,7 @@ const validateUser = (req, res, next) => {
   return next()
 }
 
-const auth = [validateUser, async (req, res, next) => {
+const login = [validateUser, async (req, res, next) => {
   try {
     const {username, password} = req.body
     const user = await User.findOne({username})
@@ -55,12 +56,12 @@ const authenticate = async (req, res, next) => {
       const {username, id} = jwt.verify(token, SECRET)
       const user = await User.findById(id)
       if (!user) {
-        res.status(401).send({error: 'Un-authorization'})
+        return res.status(401).send({error: 'Un-authorization'})
       }
       req.user = user
-      next()
+      return next()
     } else {
-      res.status(401).send({error: 'Un-authorization'})
+      return res.status(401).send({error: 'Un-authorization'})
     }
   } catch (e) {
     next(e)
@@ -68,7 +69,32 @@ const authenticate = async (req, res, next) => {
 
 
 }
+
+const isOwnBlog = [authenticate, async (req, res, next) => {
+  try {
+    const user = req.user
+    if (!user) {
+      return res.status(403).send({error: 'Forbidden'})
+    }
+    const {id} = req.params
+    const blog = await Blog.findById(id)
+    if (!blog) {
+      return res.status(404).send({error: 'Not found'})
+    }
+
+    if (blog.user.toString() === user.id.toString()) {
+      return next()
+    } else {
+      return res.status(403).send({error: 'Forbidden'})
+    }
+  } catch (e) {
+    next(e)
+  }
+}]
+
+
 module.exports = {
-  login: auth,
-  authenticate
+  login,
+  authenticate,
+  isOwnBlog
 }
