@@ -96,7 +96,21 @@ describe('api test', () => {
       .expect(200)
       .expect('Content-Type', /application\/json/)
     expect(res.body).toHaveProperty('likes', 0)
+  })
+  const badBlogs = [
+    {
+      url: 'https://reactpatterns.com/',
+    },
+    {
+      title: 'React patterns',
+    }
+  ]
 
+  test.each(badBlogs)('blog-list-test: cannot create new blog with empty title or url', async (blogInput) => {
+    const res = await api
+      .post('/api/blogs')
+      .send(blogInput)
+      .expect(400)
   })
 
   afterAll(async (done) => {
