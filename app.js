@@ -8,11 +8,10 @@ const userRouter = require('./routes/user')
 const authRouter = require('./routes/auth')
 
 const {NODE_ENV} = require('./utils/config')
+
 const {unknownEndpoint, errorHandler} = require('./utils/middlewares')
 // connect database
-if (NODE_ENV !== 'test') {
-  mongoConnection.initialize()
-}
+mongoConnection.initialize()
 
 // application
 app.use(cors())
@@ -33,6 +32,10 @@ app.use(morganStyle)
 app.use('/api', authRouter)
 app.use('/api', blogRouter)
 app.use('/api', userRouter)
+if (NODE_ENV === 'test') {
+  const testingRouter = require('./routes/testing')
+  app.use('/api', testingRouter)
+}
 
 // error handler
 app.use(errorHandler)
