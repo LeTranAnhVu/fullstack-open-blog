@@ -3,7 +3,7 @@ const User = require('../models/user')
 // apis
 const getAll = async (req, res, next) => {
   try {
-    const blog = await Blog.find().populate('user', {username: 1, name: 1}).exec()
+    const blog = await Blog.find()
     return res.json(blog)
   } catch (e) {
     next(e)
@@ -25,7 +25,6 @@ const create = async (req, res, next) => {
     user.save()
     return res.json(newBlog)
   } catch (e) {
-    console.log('eeee', e)
     next(e)
   }
 }
