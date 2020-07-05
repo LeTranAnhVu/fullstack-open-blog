@@ -63,7 +63,6 @@ const updateById = async (req, res, next) => {
     next(e)
   }
 }
-
 const likeBlogById = async (req, res, next) => {
   try {
     const {id} = req.params
@@ -78,6 +77,22 @@ const likeBlogById = async (req, res, next) => {
     next(e)
   }
 }
+const addNewCommentById = async (req, res, next) => {
+  try {
+    const {id} = req.params
+    const {comment} = req.body
+    const blog = await Blog.findById(id)
+    if (!blog) {
+      throw new Error('Not found')
+    }
+    blog.comments = [...blog.comments, comment]
+    blog.save()
+    return res.json(blog)
+  } catch (e) {
+    next(e)
+  }
+}
+
 
 
 module.exports = {
@@ -86,5 +101,6 @@ module.exports = {
   deleteById,
   updateById,
   getById,
-  likeBlogById
+  likeBlogById,
+  addNewCommentById
 }

@@ -29,6 +29,19 @@ const validateUser = (req, res, next) => {
   return next()
 }
 
+const getById = async (req, res, next) => {
+  try {
+    const {id} = req.params
+    const user = await User.findById(id).populate('blogs', {user: 0}).exec()
+    if (!user) {
+      throw new Error('Not found')
+    }
+    return res.json(user)
+  } catch (e) {
+    next(e)
+  }
+}
+
 const create = [validateUser, async (req, res, next) => {
   try {
     const {username, name, password} = req.body
@@ -46,5 +59,6 @@ const create = [validateUser, async (req, res, next) => {
 
 module.exports = {
   getAll,
-  create
+  create,
+  getById
 }
